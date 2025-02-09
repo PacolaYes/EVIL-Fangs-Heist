@@ -16,9 +16,6 @@ FangsHeist.makeCharacter("amy", {
 	isAttacking = function(self, p)
 		return (p.powers[pw_strong] & STR_ATTACK)
 	end,
-	onAttack = function(self, p)
-		return true
-	end,
 	onHit = function(self, p, projectile, sound)
 		if projectile then return end
 
@@ -34,6 +31,7 @@ FangsHeist.makeCharacter("amy", {
 		p.mo.state = S_PLAY_STND
 		return true
 	end,
+	useDefaultAttack = false,
 
 	controls = {
 		{
@@ -148,6 +146,10 @@ end)
 addHook("JumpSpinSpecial", function(p)
 	if not FangsHeist.isMode() then return end
 	if not check(p) then
+		return
+	end
+
+	if p.powers[pw_shield] then
 		return
 	end
 
