@@ -1,0 +1,1 @@
+fang hesit if it was evil and uhmn i think its pretty evil atleast yknow it might not be so evil if you get to know it better but i dont know it better so it is pretty evil to me so id say its evil fang sheit ok thanks for listening have a good day you are cool
