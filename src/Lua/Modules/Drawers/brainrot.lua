@@ -11,7 +11,7 @@ end
 function module.draw(v,p)
 	time = $+1
 	
-	subwayPos = pos%5 and $ or $+1
+	subwayPos = time%5 and $ or $+1
 	--if pos%5 == 0 then subwayPos = $+1 end
 	if subwayPos > 1724 then
 		subwayPos = $-1724
