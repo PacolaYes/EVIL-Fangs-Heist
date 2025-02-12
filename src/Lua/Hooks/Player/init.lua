@@ -62,56 +62,6 @@ addHook("MobjDeath", function(t,i,s)
 	t.player.heist.spectator = true
 end, MT_PLAYER)
 
-addHook("ShouldDamage", function(t,i,s,dmg,dt)
-	if not FangsHeist.isMode() then return end
-	if not (t and t.player and t.player.heist) then return end
-	
-	if t.player.heist.exiting then
-		return false
-	end
-
-	local blockDeplete = FH_BLOCKDEPLETION
-	local forceDmg
-	if i
-	and i.valid then
-		if i.type == MT_CORK then
-			if t.player.powers[pw_flashing]
-			or t.player.powers[pw_invulnerability] then
-				return false
-			end
-		end
-		
-		if i.type == MT_LHRT then
-			if t.player.powers[pw_flashing]
-			or t.player.powers[pw_invulnerability] then
-				return false
-			end
-			
-			blockDeplete = $/5
-			forceDmg = true
-		end
-	end
-
-	if s
-	and s.valid
-	and s.player
-	and s.player.heist then
-		if t.player.heist.blocking then
-			t.player.heist.block_time = min(FH_BLOCKTIME, $+blockDeplete)
-			if t.player.heist.block_time == FH_BLOCKTIME then
-				t.player.heist.block_cooldown = 5*TICRATE
-				t.player.heist.blocking = false
-				S_StartSound(t, sfx_fhbbre)
-				return true
-			else
-				S_StartSound(t, sfx_s3k7b)
-				return false
-			end
-		end
-	end
-	return forceDmg
-end, MT_PLAYER)
-
 addHook("MobjDamage", function(t,i,s,dmg,dt)
 	if not FangsHeist.isMode() then return end
 	if not (t and t.player and t.player.heist) then return end
