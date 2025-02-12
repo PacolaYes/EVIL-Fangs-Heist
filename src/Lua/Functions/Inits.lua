@@ -105,7 +105,7 @@ function FangsHeist.loadMap()
 				P_RemoveMobj(thing.mobj)
 			end
 		end
-
+		
 		if thing.type == 3844 then
 			exit = thing
 		end
