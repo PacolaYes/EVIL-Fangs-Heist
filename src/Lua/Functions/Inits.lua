@@ -78,6 +78,10 @@ local replace_types = {
 	[MT_1UP_BOX] = MT_RING_BOX
 }
 
+for i = 1, (656+512) do
+	replace_types[i] = MT_CYBRAKDEMON
+end
+
 local delete_types = { -- why wasnt this a table like the rest before? -pac
 	[MT_ATTRACT_BOX] = true,
 	[MT_INVULN_BOX] = true,
