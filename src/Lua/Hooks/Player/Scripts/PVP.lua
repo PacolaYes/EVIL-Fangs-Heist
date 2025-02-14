@@ -205,6 +205,7 @@ return function(p)
 		p.heist.block_time = max(0, $-2)
 
 		if p.heist.block_cooldown == 0
+		and p.heist.attack_cooldown == 0
 		and p.cmd.buttons & BT_FIRENORMAL
 		and not P_PlayerInPain(p) then
 			p.heist.block_cooldown = FH_BLOCKCOOLDOWN
