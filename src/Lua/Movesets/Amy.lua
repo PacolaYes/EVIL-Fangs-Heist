@@ -19,8 +19,8 @@ states[freeslot "S_FH_THROWNHAMMER"] = {
 }
 mobjinfo[freeslot "MT_FH_THROWNHAMMER"] = {
 	spawnstate = S_FH_THROWNHAMMER,
-	radius = 16*FU,
-	height = 16*FU,
+	radius = 64*FU,
+	height = 64*FU,
 	flags = MF_NOCLIP|MF_NOCLIPHEIGHT|MF_NOGRAVITY
 }
 
@@ -112,7 +112,9 @@ local function throwHammer(p)
 
 	hammer.target = p.mo
 	hammer.returntics = 16
-	P_InstaThrust(hammer, p.mo.angle, FixedHypot(p.mo.momx, p.mo.momy)+50*FU)
+	P_InstaThrust(hammer, p.mo.angle, FixedHypot(p.mo.momx, p.mo.momy)+53*FU)
+
+	S_StartSound(p.mo, sfx_s3k51)
 
 	return hammer
 end
@@ -259,13 +261,23 @@ local function L_ReturnThrustXYZ(mo, point, speed)
 	return x, y, z
 end
 
-local function isDamagable(mo)
+local function isDamagable(mo, p)
 	if mo.flags & MF_ENEMY
 	or mo.flags & MF_MONITOR then
 		return true
 	end
-
-	if mo.type == MT_PLAYER then
+	
+	if mo.type == MT_PLAYER
+	and p
+	and p.heist
+	and mo.player
+	and mo.player.heist
+	and not FangsHeist.partOfTeam(p, mo.player) then
+		return true
+	end
+	
+	if mo.type == MT_RING 
+	or mo.type == MT_FLINGRING then
 		return true
 	end
 
@@ -273,23 +285,51 @@ local function isDamagable(mo)
 end
 
 local function collisionCheck(mo, pmo)
-	return mo.x-mo.radius < pmo.x+pmo.radius
-	and pmo.x-pmo.radius < mo.x+mo.radius
-	and mo.y-mo.radius < pmo.y+pmo.radius
-	and pmo.y-pmo.radius < mo.y+mo.radius
+	return FixedHypot(mo.x-pmo.x, mo.y-pmo.y) <= pmo.radius+mo.radius
 	and mo.z < pmo.z+pmo.height
 	and pmo.z < mo.z+mo.height
 end
 
+local function erectRing(mo, found)
+	if mo.target and mo.target.valid then
+		if found.type == MT_RING 
+		or found.type == MT_FLINGRING then
+			P_TouchSpecialThing(found, mo.target)
+			return true
+		end
+	end
+end
+
 local function onObjectFound(mo, found)
 	if not (found and found.valid) then return end
-	if not isDamagable(found) then return end
+	if not isDamagable(found, mo.target.player) then return end
 	if found == mo.target then return end
 	if not collisionCheck(mo, found) then return end
+	
+	if erectRing(mo, found) then return end
+	
 	if P_DamageMobj(found, mo, mo.target) then
+		if found.type == MT_PLAYER then
+			S_StartSound(mo, sfx_dmga3)
+			S_StartSound(mo.target, sfx_dmga3, mo.target.player)
+		end
+
 		mo.momx = $*-1
 		mo.momy = $*-1
 		mo.momz = $*-1
+		mo.returntics = 0
+
+		return
+	end
+
+	if found.type == MT_PLAYER
+	and found.player
+	and found.player.heist
+	and found.player.heist.blocking then
+		mo.momx = $*-1
+		mo.momy = $*-1
+		mo.momz = $*-1
+		mo.returntics = 0
 	end
 end
 
@@ -311,7 +351,7 @@ addHook("MobjThinker", function(mo)
 	local pmo = mo.target
 
 	local angle = R_PointToAngle2(mo.x, mo.y, pmo.x, pmo.y)
-	local speed = tofixed("0.13")
+	local speed = tofixed("0.07")
 
 	local x, y, z = L_ReturnThrustXYZ(mo, pmo, 3*FU)
 	local friction = tofixed("0.95")
@@ -323,16 +363,17 @@ addHook("MobjThinker", function(mo)
 	searchBlockmap("objects",
 		onObjectFound,
 		mo,
-		mo.x-mo.radius,
-		mo.x+mo.radius,
-		mo.y-mo.radius,
-		mo.y+mo.radius
+		mo.x-mo.radius*2, -- Even if you change the radius and height, keep it multiplied by 2, so it's accurate.
+		mo.x+mo.radius*2,
+		mo.y-mo.radius*2, 
+		mo.y+mo.radius*2
 	)
 
 	mo.returntics = max(($ or 0)-1, 0)
 
 	if collisionCheck(pmo, mo)
 	and mo.returntics == 0 then
+		S_StartSound(pmo, sfx_s3k4a)
 		if pmo.player and pmo.player.amy then
 			pmo.player.amy.thrown = nil
 		end

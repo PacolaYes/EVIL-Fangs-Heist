@@ -235,6 +235,9 @@ return function(p)
 				local sound = attackSounds[tier][P_RandomRange(1, 2)]
 
 				S_StartSound(p.mo, sound)
+
+				p.heist.attack_cooldown = 0
+				p.heist.block_time = max(0, $-20)
 			end
 
 			local angle = R_PointToAngle2(p.mo.x, p.mo.y, player.mo.x, player.mo.y)

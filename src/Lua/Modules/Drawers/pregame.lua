@@ -57,20 +57,18 @@ local function draw_cs(v,p)
 		
 		local patch
 		local scale = FU
-		local fakeyoffset = 0
 		if skins[i].sprites[SPR2_LIFE].numframes then 
 			patch = v.getSprite2Patch(i, SPR2_LIFE, false, A)
 			scale = skins[i].highresscale
 		else
 			patch = v.cachePatch("CONTINS")
-			fakeyoffset = 12
 		end
 		
 		if i == p.heist.locked_skin then
 			scale = $*3/2
 		end
 		v.drawScaled(x + patch.leftoffset*scale,
-			y - fakeyoffset*scale,
+			y + patch.topoffset*scale - patch.height*scale,
 			scale,
 			patch,
 			V_SNAPTOLEFT|f,
